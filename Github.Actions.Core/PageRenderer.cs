@@ -1,4 +1,6 @@
-﻿using System.Text.Encodings.Web;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text.Encodings.Web;
 using HtmlAgilityPack;
 using PuppeteerSharp;
 using SkiaSharp;
@@ -58,6 +60,26 @@ public class PageRenderer : IDisposable
 
         return null;
     }
+
+    async Task Exec(string cmd)
+    {
+        var escapedArgs = cmd.Replace("\"", "\\\"");
+        using var process = new Process
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                FileName = "/bin/bash",
+                Arguments = $"-c \"{escapedArgs}\""
+            }
+        };
+
+        process.Start();
+        await process.WaitForExitAsync();
+    }
     
     /// <summary>
     /// Render <paramref name="htmlContents"/>, grab a base64 encoded string from the DOM using <paramref name="elementId"/>.
@@ -80,6 +102,14 @@ public class PageRenderer : IDisposable
         {
             await _browserFetcher.DownloadAsync();
 
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var path = _browserFetcher.GetExecutablePath(BrowserFetcher.DefaultChromiumRevision);
+                Console.WriteLine($"Setting permissions for: {path}");
+
+                await Exec($"chmod 777 {path}");
+            }
+            
             await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {
                 Headless = true,

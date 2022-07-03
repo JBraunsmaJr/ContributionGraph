@@ -3,13 +3,6 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-RUN apt update
-RUN apt install git
-
-COPY install-powershell.sh install-powershell.sh
-RUN ./install-powershell.sh
-RUN rm -f install-powershell.sh
-
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["Github.Actions.ContributionGraph/Github.Actions.ContributionGraph.csproj", "Github.Actions.ContributionGraph/"]

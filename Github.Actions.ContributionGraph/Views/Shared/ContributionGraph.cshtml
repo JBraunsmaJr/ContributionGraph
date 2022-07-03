@@ -1,0 +1,58 @@
+﻿@model Github.Actions.ContributionGraph.ViewModels.ContributionViewModel
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>GitHub Action</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.0/chart.min.js" integrity="sha512-sW/w8s4RWTdFFSduOTGtk4isV1+190E/GghVffMA9XczdJ2MDzSzLEubKAs5h0wzgSJOQTRYyaz73L3d6RtJSg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+</head>
+<style>
+    #myChart {
+    }
+</style>
+<body>
+<div class="chart-container"
+     style="position: relative; width: 500px; height:  120px">
+    <canvas id="myChart"></canvas>
+</div>
+<div id="myimage"></div>
+@{
+    var sorted = Model.Items.GetViewBy(Model.ViewBy);
+
+    var labels = string.Join(", ", sorted.Keys.Select(x=>$"'{x}'"));
+    var data = string.Join(", ", sorted.Values);
+}
+
+<script>
+    const ctx = document.getElementById('myChart');
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [@Html.Raw(labels)],
+            datasets: [{
+                label: 'Test Run',
+                data: [@Html.Raw(data)],
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            animation: {
+                duration: 0 // animation time should be instant
+            }
+       }
+    });
+    
+    setTimeout(()=>
+    {
+        document.getElementById("myimage").innerText = myChart.toBase64Image();
+    }, 1000);
+    
+</script>
+</body>
+
+</html>

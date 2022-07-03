@@ -11,6 +11,13 @@ I'm new to creating github actions, so bear with me. If there is an easier way o
 let me know!
 
 ```yaml
+# run every day at midnight
+on:
+   schedule:
+     - cron: "0 0 * * *"
+```
+
+```yaml
 # this will generate the contribution graph into an 'images' folder
 - uses: JBraunsmaJr/contributiongraph@master
   with:

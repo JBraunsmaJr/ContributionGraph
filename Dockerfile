@@ -9,6 +9,7 @@ COPY ["Github.Actions.ContributionGraph/Github.Actions.ContributionGraph.csproj"
 COPY ["Github.Actions.Core/Github.Actions.Core.csproj", "Github.Actions.Core/"]
 RUN dotnet restore "Github.Actions.ContributionGraph/Github.Actions.ContributionGraph.csproj"
 COPY . .
+
 WORKDIR "/src/Github.Actions.ContributionGraph"
 RUN dotnet build "Github.Actions.ContributionGraph.csproj" -c Release -o /app/build
 

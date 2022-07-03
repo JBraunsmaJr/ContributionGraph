@@ -2,7 +2,6 @@
 using CommandLine;
 using Github.Actions.ContributionGraph;
 using Github.Actions.ContributionGraph.ViewModels;
-using Github.Actions.Core;
 using Octokit.GraphQL;
 using Razor.Templating.Core;
 using static CommandLine.Parser;

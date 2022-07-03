@@ -5,7 +5,7 @@ using HtmlAgilityPack;
 using PuppeteerSharp;
 using SkiaSharp;
 
-namespace Github.Actions.Core;
+namespace Github.Actions.ContributionGraph;
 
 public class PageRenderer : IDisposable
 {
@@ -108,6 +108,7 @@ public class PageRenderer : IDisposable
                 Console.WriteLine($"Setting permissions for: {path}");
 
                 await Exec($"chmod 777 {path}");
+                
             }
             
             await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions

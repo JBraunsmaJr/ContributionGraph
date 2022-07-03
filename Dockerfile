@@ -12,10 +12,11 @@ LABEL com.github.actions.description = "Uses your PAT to generate a contribution
 LABEL com.github.actions.icon = "sliders"
 LABEL com.github.actions.color = "purple"
 
+RUN apt-get update && apt-get install -y libx11-6 libx11-xcb1 libatk1.0-0 libgtk-3-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2 libxshmfence1 libnss3
+
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["Github.Actions.ContributionGraph/Github.Actions.ContributionGraph.csproj", "Github.Actions.ContributionGraph/"]
-COPY ["Github.Actions.Core/Github.Actions.Core.csproj", "Github.Actions.Core/"]
 RUN dotnet restore "Github.Actions.ContributionGraph/Github.Actions.ContributionGraph.csproj"
 COPY . .
 

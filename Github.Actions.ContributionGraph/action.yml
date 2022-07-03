@@ -27,10 +27,6 @@ runs:
   args:
     - '-o'
     - ${{ inputs.owner }}
-    - '-n'
-    - ${{ inputs.name }}
-    - '-b'
-    - ${{ inputs.branch }}
     - '-t'
     - ${{ inputs.token }}
     - '-v'

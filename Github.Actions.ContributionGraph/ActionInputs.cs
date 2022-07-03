@@ -52,8 +52,18 @@ public class ActionInputs
     [Option('f', "farback",
         Required = false,
         HelpText = "Amount of time (based on viewby) to go back")]
-    public int? FarBack { get; set; }
+    public string? FarBackText { get; set; }
 
+    public int? FarBack
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(FarBackText))
+                return null;
+            return int.Parse(FarBackText);
+        }
+    }
+    
     static void ParseAndAssign(string? value, Action<string> assign)
     {
         if (value is { Length: > 0 } && assign is not null)

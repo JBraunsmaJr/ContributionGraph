@@ -3,6 +3,15 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+LABEL maintainer="Badger 2-3"
+LABEL repository="https://github.com/jbraunsmajr/contributiongraph"
+
+# label as github action
+LABEL com.github.actions.name = "Generate Contribution Graph"
+LABEL com.github.actions.description = "Uses your PAT to generate a contribution graph that you can use for your profile"
+LABEL com.github.actions.icon = "sliders"
+LABEL com.github.actions.color = "purple"
+
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["Github.Actions.ContributionGraph/Github.Actions.ContributionGraph.csproj", "Github.Actions.ContributionGraph/"]

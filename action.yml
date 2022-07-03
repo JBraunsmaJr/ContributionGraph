@@ -23,7 +23,7 @@ inputs:
     default: 14
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/jbraunsmajr/contributiongraph'
+  image: 'docker://ghcr.io/jbraunsmajr/contributiongraph:master'
   args:
     - '-o'
     - ${{ inputs.owner }}

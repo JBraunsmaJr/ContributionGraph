@@ -6,6 +6,8 @@ rate limiting problem I figured... how often do these stats need to be updated?
 
 If anything... once perday... right? Alleviates potential rate-limiting! 
 
+![contribution graph example](assets/contribution-graph.png)
+
 # Usage
 I'm new to creating github actions, so bear with me. If there is an easier way of doing things please
 let me know!

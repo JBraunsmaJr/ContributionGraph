@@ -80,7 +80,11 @@ public class PageRenderer : IDisposable
         {
             await _browserFetcher.DownloadAsync();
 
-            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
+            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            {
+                Headless = true,
+                Args = new[]{ "--disable-gpu", "--no-sandbox" }
+            });
             await using var page = await browser.NewPageAsync();
             await page.SetContentAsync(htmlContents);
 

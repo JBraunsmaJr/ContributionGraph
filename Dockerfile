@@ -28,4 +28,4 @@ RUN dotnet publish "Github.Actions.ContributionGraph.csproj" -c Release -o /app/
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Github.Actions.ContributionGraph.dll"]
+ENTRYPOINT ["dotnet", "/app/Github.Actions.ContributionGraph.dll"]

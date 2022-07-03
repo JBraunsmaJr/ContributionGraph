@@ -13,6 +13,7 @@ inputs:
   title:
     description: "Title to appear on graph"
     required: false
+    default: "Contribution Graph"
   viewby:
     description: "day, week, month"
     required: true

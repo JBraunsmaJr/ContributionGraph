@@ -8,21 +8,47 @@ namespace Github.Actions.ContributionGraph;
 
 public static class Util
 {
-    public static string GetViewPath(string view)
+    public static ContributionViewBy GetViewBy(this ActionInputs config)
     {
-        if (!view.EndsWith(".cshtml"))
-            view += ".cshtml";
-        
-        var path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, view);
+        var viewBy = string.IsNullOrEmpty(config.ViewBy)
+            ? ContributionViewBy.Month
+            : config.ViewBy.ToLower() switch
+            {
+                "month" => ContributionViewBy.Month,
+                "week" => ContributionViewBy.Week,
+                _ => ContributionViewBy.Day
+            };
 
-        if (!File.Exists(path))
-            path = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Views", "Shared", view);
-
-        return path;
+        return viewBy;
     }
-    // ReSharper disable once InconsistentNaming
-    static string ToGraphQL(this DateTime time) =>
-        time.ToString("yyyy-MM-dd") + "T" + time.ToString("hh:mm:ss");
+
+    public static DateTime FarBack(this ActionInputs config, ContributionViewBy viewBy)
+    {
+        var farBackConfig = config.FarBack;
+        var farBack = farBackConfig ?? 31;
+        
+        // Ensure the value we have is sanitized... cuz users....
+        farBack = Math.Abs(farBack);
+        
+        var today = DateTime.Today;
+
+        // GraphQL for github limits us to <= 1 year of stats
+        switch (viewBy)
+        {
+            case ContributionViewBy.Day:
+                if (farBack >= 365)
+                    farBack = 364;
+                return today.AddDays(-farBack);
+            case ContributionViewBy.Month:
+                if (farBack >= 12)
+                    farBack = 11;
+                return today.AddMonths(-farBack);
+            default:
+                if (farBack >= 52)
+                    farBack = 51;
+                return today.AddDays(farBack * 7);
+        }
+    }
     
     public static async Task<List<ContributionItem>> FetchUserContributions(string user, DateTime from, DateTime to, Connection connection)
     {
@@ -50,6 +76,8 @@ public static class Util
 
     public static Dictionary<string, int> GetViewBy(this List<ContributionItem> items, ContributionViewBy viewBy)
     {
+        items = items.OrderBy(x => x.Date).ToList();
+        
         if (viewBy == ContributionViewBy.Day)
             return items.GroupBy(x => x.Date.ToString("MM/dd"))
                 .ToDictionary(x => x.Key, x => x.Sum(y => y.Count));
@@ -57,10 +85,6 @@ public static class Util
         if (viewBy == ContributionViewBy.Month)
             return items.GroupBy(x => x.Date.ToString("MMM"))
                     .ToDictionary(x => x.Key, x => x.Sum(y => y.Count));
-
-        if (viewBy == ContributionViewBy.Year)
-            return items.GroupBy(x => x.Date.ToString("yyyy"))
-                .ToDictionary(x => x.Key, x => x.Sum(y => y.Count));
 
         Dictionary<string, int> results = new();
 

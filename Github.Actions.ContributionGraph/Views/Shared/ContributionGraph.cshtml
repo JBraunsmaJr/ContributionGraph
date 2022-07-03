@@ -1,4 +1,7 @@
-﻿@model Github.Actions.ContributionGraph.ViewModels.ContributionViewModel
+﻿@using Github.Actions
+@using Github.Actions.ContributionGraph
+@using Microsoft.AspNetCore.Html
+@model Github.Actions.ContributionGraph.ViewModels.ContributionViewModel
 
 <!DOCTYPE html>
 
@@ -31,10 +34,10 @@
     const myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [@Html.Raw(labels)],
+            labels: [@(new HtmlString(labels))],
             datasets: [{
-                label: 'Test Run',
-                data: [@Html.Raw(data)],
+                label: "@(new HtmlString(Model.Title))",
+                data: [@(new HtmlString(data))],
                 fill: false,
                 borderColor: 'rgb(75, 192, 192)',
                 tension: 0.1

@@ -1,0 +1,41 @@
+﻿name: 'Contribution Graph'
+description: 'Generates a github contribution graph to use for your github profile!'
+branding:
+  icon: activity
+  color: orange
+inputs:
+  owner:
+    description: 'The owner of the repo. Assign from github.repository_owner'
+    required: true
+  token:
+    description: "Personal access token that meets the scope criteria for Github GraphQL API"
+    required: true
+  title:
+    description: "Title to appear on graph"
+    required: false
+  viewby:
+    description: "day, week, month"
+    required: true
+    default: 'day'
+  farback:
+    description: "Amount of 'viewby' to go back on our graph. You cannot exceed a year as per github requirements"
+    required: false
+    default: 14
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - '-o'
+    - ${{ inputs.owner }}
+    - '-n'
+    - ${{ inputs.name }}
+    - '-b'
+    - ${{ inputs.branch }}
+    - '-t'
+    - ${{ inputs.token }}
+    - '-v'
+    - ${{ inputs.viewby }}
+    - '-f'
+    - ${{ inputs.farback }}
+    - '-l'
+    - ${{ inputs.title }}

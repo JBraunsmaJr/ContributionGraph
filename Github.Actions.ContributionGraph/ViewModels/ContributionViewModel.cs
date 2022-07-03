@@ -6,12 +6,12 @@ public enum ContributionViewBy
 {
     Day,
     Week,
-    Month,
-    Year
+    Month
 }
 
 public class ContributionViewModel
 {
+    public string? Title { get; set; }
     public List<ContributionItem> Items { get; set; } = new();
     public ContributionViewBy ViewBy { get; set; }
 }

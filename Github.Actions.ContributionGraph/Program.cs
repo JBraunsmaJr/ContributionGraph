@@ -8,6 +8,10 @@ using static CommandLine.Parser;
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration(config =>
     {
+        #if DEBUG
+        config.AddUserSecrets<Program>();
+        #endif
+        
         config.AddEnvironmentVariables();
     })
     .Build();
@@ -17,7 +21,7 @@ parser.WithNotParsed(
     errors =>
     {
         host.Services.GetRequiredService<ILoggerFactory>()
-            .CreateLogger("Github.Actions.ContributionGraph")
+            .CreateLogger(typeof(Program).Namespace!)
             .LogError(string.Join(Environment.NewLine, errors.Select(x => x.ToString())));
 
         Environment.Exit(2);

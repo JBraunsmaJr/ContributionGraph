@@ -9,7 +9,7 @@ namespace Github.Actions.ContributionGraph;
 
 public class PageRenderer : IDisposable
 {
-    private BrowserFetcher? _browserFetcher;
+    private BrowserFetcher _browserFetcher;
 
     public PageRenderer()
     {
@@ -25,16 +25,12 @@ public class PageRenderer : IDisposable
     /// <exception cref="ArgumentNullException">When browser or htmlContents are not provided</exception>
     public async Task<byte[]?> DownloadPage(string htmlContents, TimeSpan? renderWaitPeriod = null)
     {
-        if (_browserFetcher is null)
-            throw new ArgumentNullException(nameof(_browserFetcher));
         if (string.IsNullOrEmpty(htmlContents))
             throw new ArgumentNullException(nameof(htmlContents));
 
         try
         {
-            await _browserFetcher.DownloadAsync();
-
-            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
+            await using var browser = await Launch();
             await using var page = await browser.NewPageAsync();
             await page.SetContentAsync(htmlContents);
 
@@ -60,26 +56,6 @@ public class PageRenderer : IDisposable
 
         return null;
     }
-
-    async Task Exec(string cmd)
-    {
-        var escapedArgs = cmd.Replace("\"", "\\\"");
-        using var process = new Process
-        {
-            StartInfo = new ProcessStartInfo()
-            {
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                FileName = "/bin/bash",
-                Arguments = $"-c \"{escapedArgs}\""
-            }
-        };
-
-        process.Start();
-        await process.WaitForExitAsync();
-    }
     
     /// <summary>
     /// Render <paramref name="htmlContents"/>, grab a base64 encoded string from the DOM using <paramref name="elementId"/>.
@@ -91,8 +67,6 @@ public class PageRenderer : IDisposable
     /// <exception cref="ArgumentNullException">When browser, htmlContents, or elementId are null/not provided</exception>
     public async Task<byte[]?> DownloadImageFromPage(string htmlContents, string elementId, TimeSpan? renderWaitPeriod = null)
     {
-        if (_browserFetcher is null)
-            throw new ArgumentNullException(nameof(_browserFetcher));
         if (string.IsNullOrEmpty(htmlContents))
             throw new ArgumentNullException(nameof(HtmlEncoder));
         if (string.IsNullOrEmpty(elementId))
@@ -100,22 +74,7 @@ public class PageRenderer : IDisposable
 
         try
         {
-            await _browserFetcher.DownloadAsync();
-
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var path = _browserFetcher.GetExecutablePath(BrowserFetcher.DefaultChromiumRevision);
-                Console.WriteLine($"Setting permissions for: {path}");
-
-                await Exec($"chmod 777 {path}");
-                
-            }
-            
-            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-            {
-                Headless = true,
-                Args = new[]{ "--disable-gpu", "--no-sandbox" }
-            });
+            await using var browser = await Launch();    
             await using var page = await browser.NewPageAsync();
             await page.SetContentAsync(htmlContents);
 
@@ -136,6 +95,7 @@ public class PageRenderer : IDisposable
             using var ms = new MemoryStream(bytes);
             var image = SKImage.FromEncodedData(ms);
             var data = image.Encode();
+            
             using var outstream = new MemoryStream();
             data.SaveTo(outstream);
 
@@ -149,6 +109,76 @@ public class PageRenderer : IDisposable
         }
 
         return null;
+    }
+    
+    /// <summary>
+    /// Helper method for executing a bash command
+    /// </summary>
+    /// <param name="cmd"></param>
+    private async Task Exec(string cmd)
+    {
+        var escapedArgs = cmd.Replace("\"", "\\\"");
+        using var process = new Process
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                FileName = "/bin/bash",
+                Arguments = $"-c \"{escapedArgs}\""
+            }
+        };
+
+        process.Start();
+        await process.WaitForExitAsync();
+    }
+    
+    /// <summary>
+    /// <para>
+    ///  Downloads the browser needed for Puppeteer to do its thing
+    /// </para>
+    /// <para>
+    ///    After download, if on a non-windows platform will update
+    ///    permissions on the 'downloaded browser'. 
+    /// </para>
+    /// </summary>
+    /// <exception cref="ArgumentNullException">When our local browser fetcher instance is null</exception>
+    private async Task DownloadBrowser()
+    {
+        try
+        {
+            await _browserFetcher.DownloadAsync();
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var path = _browserFetcher.GetExecutablePath(BrowserFetcher.DefaultChromiumRevision);
+                Console.WriteLine($"Setting permissions for: {path}");
+
+                await Exec($"chmod 777 {path}");
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+            Environment.Exit(1);
+        }
+    }
+    
+    /// <summary>
+    /// Consolidates downloading and launch logic into 1 place
+    /// </summary>
+    /// <returns></returns>
+    private async Task<Browser> Launch()
+    {
+        await DownloadBrowser();
+        return await Puppeteer.LaunchAsync(new LaunchOptions
+        {
+            Headless = true,
+            Args = new[] { "--disable-gpu", "--no-sandbox" }
+        });
     }
     
     public void Dispose()

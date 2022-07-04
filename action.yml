@@ -4,9 +4,6 @@ branding:
   icon: calendar
   color: orange
 inputs:
-  owner:
-    description: 'The owner of the repo. Assign from github.repository_owner'
-    required: true
   token:
     description: "Personal access token that meets the scope criteria for Github GraphQL API"
     required: true
@@ -26,8 +23,6 @@ runs:
   using: 'docker'
   image: 'docker://ghcr.io/jbraunsmajr/contributiongraph:master'
   args:
-    - '-o'
-    - ${{ inputs.owner }}
     - '-t'
     - ${{ inputs.token }}
     - '-v'

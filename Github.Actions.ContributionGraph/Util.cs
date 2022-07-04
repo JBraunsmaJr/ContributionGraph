@@ -8,6 +8,11 @@ namespace Github.Actions.ContributionGraph;
 
 public static class Util
 {
+    /// <summary>
+    /// Convert <see cref="string"/> version of 'viewBy' into <see cref="ContributionViewBy"/>
+    /// </summary>
+    /// <param name="config"></param>
+    /// <returns></returns>
     public static ContributionViewBy GetViewBy(this ActionInputs config)
     {
         var viewBy = string.IsNullOrEmpty(config.ViewBy)
@@ -21,7 +26,14 @@ public static class Util
 
         return viewBy;
     }
-
+    
+    /// <summary>
+    /// Assists with figuring out how far back to make the query. Contains some logic to prevent our query from
+    /// exceeding 1 year
+    /// </summary>
+    /// <param name="config"></param>
+    /// <param name="viewBy"></param>
+    /// <returns></returns>
     public static DateTime FarBack(this ActionInputs config, ContributionViewBy viewBy)
     {
         var farBackConfig = config.FarBack;
@@ -74,18 +86,28 @@ public static class Util
         }).ToList();
     }
 
+    /// <summary>
+    /// Groups <paramref name="items"/> by specified <paramref name="viewBy"/>.
+    /// </summary>
+    /// <param name="items"><see cref="ContributionItem"/>'s to group</param>
+    /// <param name="viewBy">Grouping methodology</param>
+    /// <returns></returns>
     public static Dictionary<string, int> GetViewBy(this List<ContributionItem> items, ContributionViewBy viewBy)
     {
         items = items.OrderBy(x => x.Date).ToList();
         
+        // Simple day display
         if (viewBy == ContributionViewBy.Day)
             return items.GroupBy(x => x.Date.ToString("MM/dd"))
                 .ToDictionary(x => x.Key, x => x.Sum(y => y.Count));
 
+        // Displays month abbreviation
         if (viewBy == ContributionViewBy.Month)
             return items.GroupBy(x => x.Date.ToString("MMM"))
                     .ToDictionary(x => x.Key, x => x.Sum(y => y.Count));
 
+        // This portion could probably be improved because we're just grabbing the first item for a given week
+        // versus figuring out the actual starting point for said week.
         Dictionary<string, int> results = new();
 
         var weeks = items.GroupBy(x =>

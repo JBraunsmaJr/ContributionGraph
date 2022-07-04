@@ -21,7 +21,7 @@ on:
 
 ```yaml
 # this will generate the contribution graph into an 'images' folder
-- uses: JBraunsmaJr/contributiongraph@master
+- uses: JBraunsmaJr/contributiongraph@v1
   with:
      token: ${{ secrets.GRAPH_QL }}
      viewby: day

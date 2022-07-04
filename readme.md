@@ -24,7 +24,6 @@ on:
      token: ${{ secrets.GRAPH_QL }}
      viewby: day
      farback: 31
-     owner: ${{ github.repository_owner }}
 
 # simply update anything within the images folder that got updated...
 - uses: stefanzweifel/git-auto-commit-action@v4
@@ -68,7 +67,3 @@ The only limitation is that Github limits the query to be less than 1 year.
 
 ### title
 The text to appear at the top of the graph
-
-### owner
-This is boilerplate at the moment. However, this should be your username 
-/ github owner as seen in the template

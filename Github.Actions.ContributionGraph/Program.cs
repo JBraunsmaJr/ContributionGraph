@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using CommandLine;
+﻿using CommandLine;
 using Github.Actions.ContributionGraph;
 using Github.Actions.ContributionGraph.ViewModels;
 using Octokit.GraphQL;
@@ -9,12 +8,7 @@ using static CommandLine.Parser;
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration(config =>
     {
-        #if DEBUG
-        config.AddJsonFile("appsettings");
-        config.AddUserSecrets<Program>();
-        #endif
         config.AddEnvironmentVariables();
-
     })
     .Build();
 
@@ -34,6 +28,12 @@ await host.RunAsync();
 
 static async Task StartAsync(ActionInputs inputs, IHost host)
 {
+    var config = host.Services.GetRequiredService<IConfiguration>();
+
+    // Retrieve the github repository owner from github's environment
+    if (config["GITHUB_REPOSITORY_OWNER"] is not null)
+        inputs.Owner = config["GITHUB_REPOSITORY_OWNER"];
+    
     var productInformation = new ProductHeaderValue("BadgerStats", "0.1");
     var connection = new Connection(productInformation, inputs.Token);
     

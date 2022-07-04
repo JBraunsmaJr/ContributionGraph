@@ -1,4 +1,4 @@
-﻿name: 'badger23-contribution-graph'
+name: 'badger23-contribution-graph'
 description: 'Generates a contribution graph that you can use on your github profile'
 branding:
   icon: calendar
